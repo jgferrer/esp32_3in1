@@ -7,9 +7,67 @@
 static LGFX_Sprite canvas(&tft);
 static bool canvas_ready = false;
 
+static bool hud_initialized = false;
+static int8_t last_hud_lives = -1;
+static uint32_t last_hud_gold = 0xFFFFFFFF;
+static uint8_t last_hud_wave = 255;
+static uint8_t last_hud_speed = 255;
+
+static bool tray_initialized = false;
+static int8_t last_tray_plot_idx = -2;
+static TowerType last_tray_plot_type = TOWER_NONE;
+static uint8_t last_tray_plot_level = 0;
+static SelectedTool last_tray_tool = (SelectedTool)-1;
+static bool last_tray_wave_in_progress = false;
+static bool last_tray_lightning_ready = false;
+static uint32_t last_tray_lightning_cd = 999;
+static bool last_tray_can_upgrade = false;
+
+static bool title_rendered = false;
+static bool game_over_rendered = false;
+static bool victory_rendered = false;
+
+void td_renderer_reset() {
+    hud_initialized = false;
+    last_hud_lives = -1;
+    last_hud_gold = 0xFFFFFFFF;
+    last_hud_wave = 255;
+    last_hud_speed = 255;
+
+    tray_initialized = false;
+    last_tray_plot_idx = -2;
+    last_tray_plot_type = TOWER_NONE;
+    last_tray_plot_level = 0;
+    last_tray_tool = (SelectedTool)-1;
+    last_tray_wave_in_progress = false;
+    last_tray_lightning_ready = false;
+    last_tray_lightning_cd = 999;
+    last_tray_can_upgrade = false;
+
+    title_rendered = false;
+    game_over_rendered = false;
+    victory_rendered = false;
+}
+
 void td_renderer_init() {
     tft.setTextWrap(false);
-    canvas_ready = canvas.createSprite(SCREEN_WIDTH, BATTLEFIELD_HEIGHT);
+    td_renderer_reset();
+
+    Serial.printf("[TD] Free heap before sprite: %u, Max block: %u\n", ESP.getFreeHeap(), ESP.getMaxAllocHeap());
+
+    // 1. Intentar Sprite RGB565 (16-bit = 106.5 KB)
+    canvas.setColorDepth(16);
+    canvas_ready = (canvas.createSprite(SCREEN_WIDTH, BATTLEFIELD_HEIGHT) != nullptr);
+
+    // 2. Si no hay bloque contiguo de 106 KB, recurrir a 8-bit (53.2 KB, siempre garantizado)
+    if (!canvas_ready) {
+        Serial.println("[TD] WARN: Fallback a sprite de 8-bit por memoria contigua");
+        canvas.setColorDepth(8);
+        canvas_ready = (canvas.createSprite(SCREEN_WIDTH, BATTLEFIELD_HEIGHT) != nullptr);
+    }
+
+    Serial.printf("[TD] canvas_ready = %d, Free heap after: %u, Max block: %u\n", canvas_ready, ESP.getFreeHeap(), ESP.getMaxAllocHeap());
+
     if (canvas_ready) {
         canvas.setTextWrap(false);
     }
@@ -58,32 +116,56 @@ static void render_title_screen() {
 }
 
 static void render_hud() {
-    tft.fillRect(0, 0, SCREEN_WIDTH, BATTLEFIELD_Y_START, COLOR_HUD_BG);
-    tft.drawFastHLine(0, BATTLEFIELD_Y_START - 1, SCREEN_WIDTH, 0x39E7);
+    if (!hud_initialized) {
+        tft.fillRect(0, 0, SCREEN_WIDTH, BATTLEFIELD_Y_START, COLOR_HUD_BG);
+        tft.drawFastHLine(0, BATTLEFIELD_Y_START - 1, SCREEN_WIDTH, 0x39E7);
 
-    char lives_str[16];
-    snprintf(lives_str, sizeof(lives_str), "HP:%d", td_game.lives);
-    tft.setTextColor(COLOR_HEART_TXT, COLOR_HUD_BG);
-    tft.drawString(lives_str, 4, 6, &fonts::Font0);
+        // Botón HOME en cabecera
+        tft.fillRoundRect(208, 3, 28, 18, 3, 0x8A22);
+        tft.setTextColor(COLOR_GOLD_TXT, 0x8A22);
+        tft.drawCenterString("H", 222, 7, &fonts::Font0);
 
-    char gold_str[16];
-    snprintf(gold_str, sizeof(gold_str), "ORO:%u", td_game.gold);
-    tft.setTextColor(COLOR_GOLD_TXT, COLOR_HUD_BG);
-    tft.drawString(gold_str, 56, 6, &fonts::Font0);
+        hud_initialized = true;
+        last_hud_lives = -1;
+        last_hud_gold = 0xFFFFFFFF;
+        last_hud_wave = 255;
+        last_hud_speed = 255;
+    }
 
-    char wave_str[16];
-    snprintf(wave_str, sizeof(wave_str), "W:%u/%u", td_game.wave, TOTAL_WAVES);
-    tft.setTextColor(COLOR_WHITE, COLOR_HUD_BG);
-    tft.drawString(wave_str, 120, 6, &fonts::Font0);
+    if (td_game.lives != last_hud_lives) {
+        last_hud_lives = td_game.lives;
+        tft.fillRect(4, 3, 50, 18, COLOR_HUD_BG);
+        char lives_str[16];
+        snprintf(lives_str, sizeof(lives_str), "HP:%d", td_game.lives);
+        tft.setTextColor(COLOR_HEART_TXT, COLOR_HUD_BG);
+        tft.drawString(lives_str, 4, 6, &fonts::Font0);
+    }
 
-    tft.fillRoundRect(170, 3, 32, 18, 3, (td_game.game_speed == 2) ? 0xFD20 : 0x2126);
-    tft.setTextColor(COLOR_WHITE, (td_game.game_speed == 2) ? 0xFD20 : 0x2126);
-    tft.drawCenterString((td_game.game_speed == 2) ? "2X" : "1X", 186, 7, &fonts::Font0);
+    if (td_game.gold != last_hud_gold) {
+        last_hud_gold = td_game.gold;
+        tft.fillRect(56, 3, 62, 18, COLOR_HUD_BG);
+        char gold_str[16];
+        snprintf(gold_str, sizeof(gold_str), "ORO:%u", td_game.gold);
+        tft.setTextColor(COLOR_GOLD_TXT, COLOR_HUD_BG);
+        tft.drawString(gold_str, 56, 6, &fonts::Font0);
+    }
 
-    // Botón HOME en cabecera
-    tft.fillRoundRect(208, 3, 28, 18, 3, 0x8A22);
-    tft.setTextColor(COLOR_GOLD_TXT, 0x8A22);
-    tft.drawCenterString("H", 222, 7, &fonts::Font0);
+    if (td_game.wave != last_hud_wave) {
+        last_hud_wave = td_game.wave;
+        tft.fillRect(120, 3, 46, 18, COLOR_HUD_BG);
+        char wave_str[16];
+        snprintf(wave_str, sizeof(wave_str), "W:%u/%u", td_game.wave, TOTAL_WAVES);
+        tft.setTextColor(COLOR_WHITE, COLOR_HUD_BG);
+        tft.drawString(wave_str, 120, 6, &fonts::Font0);
+    }
+
+    if (td_game.game_speed != last_hud_speed) {
+        last_hud_speed = td_game.game_speed;
+        uint16_t bg = (td_game.game_speed == 2) ? 0xFD20 : 0x2126;
+        tft.fillRoundRect(170, 3, 32, 18, 3, bg);
+        tft.setTextColor(COLOR_WHITE, bg);
+        tft.drawCenterString((td_game.game_speed == 2) ? "2X" : "1X", 186, 7, &fonts::Font0);
+    }
 }
 
 static void render_battlefield() {
@@ -256,11 +338,45 @@ static void render_battlefield() {
 }
 
 static void render_bottom_tray() {
+    bool needs_redraw = !tray_initialized;
+
+    if (td_game.selected_plot_idx >= 0 && td_game.plots[td_game.selected_plot_idx].type != TOWER_NONE) {
+        TowerPlot& p = td_game.plots[td_game.selected_plot_idx];
+        bool can_up = (p.level < 3) && (td_game.gold >= tower_get_upgrade_cost(p.type, p.level));
+
+        if (td_game.selected_plot_idx != last_tray_plot_idx ||
+            p.type != last_tray_plot_type ||
+            p.level != last_tray_plot_level ||
+            can_up != last_tray_can_upgrade) {
+            needs_redraw = true;
+        }
+    } else {
+        bool l_ready = td_game.is_lightning_ready();
+        uint32_t l_cd = td_game.get_lightning_cd_remaining_sec();
+
+        if (last_tray_plot_idx >= 0 || // Venía de tener un plot seleccionado
+            td_game.selected_tool != last_tray_tool ||
+            td_game.wave_in_progress != last_tray_wave_in_progress ||
+            l_ready != last_tray_lightning_ready ||
+            (!l_ready && l_cd != last_tray_lightning_cd)) {
+            needs_redraw = true;
+        }
+    }
+
+    if (!needs_redraw) return;
+
+    tray_initialized = true;
+    last_tray_plot_idx = td_game.selected_plot_idx;
+
     tft.fillRect(0, BOTTOM_TRAY_Y_START, SCREEN_WIDTH, BOTTOM_TRAY_HEIGHT, COLOR_TRAY_BG);
     tft.drawFastHLine(0, BOTTOM_TRAY_Y_START, SCREEN_WIDTH, 0x39E7);
 
     if (td_game.selected_plot_idx >= 0 && td_game.plots[td_game.selected_plot_idx].type != TOWER_NONE) {
         TowerPlot& p = td_game.plots[td_game.selected_plot_idx];
+        last_tray_plot_type = p.type;
+        last_tray_plot_level = p.level;
+        bool can_up = (p.level < 3) && (td_game.gold >= tower_get_upgrade_cost(p.type, p.level));
+        last_tray_can_upgrade = can_up;
 
         char title[32];
         snprintf(title, sizeof(title), "TORRE %s (NV %u)", tower_get_name(p.type), p.level);
@@ -271,7 +387,6 @@ static void render_bottom_tray() {
             uint16_t up_cost = tower_get_upgrade_cost(p.type, p.level);
             char up_str[24];
             snprintf(up_str, sizeof(up_str), "+SUBIR (%ug)", up_cost);
-            bool can_up = (td_game.gold >= up_cost);
             tft.fillRoundRect(8, BOTTOM_TRAY_Y_START + 18, 108, 32, 4, can_up ? 0x2EA5 : 0x4208);
             tft.setTextColor(can_up ? COLOR_WHITE : 0x8410, can_up ? 0x2EA5 : 0x4208);
             tft.drawCenterString(up_str, 62, BOTTOM_TRAY_Y_START + 28, &fonts::Font0);
@@ -293,6 +408,11 @@ static void render_bottom_tray() {
         tft.drawCenterString("X", 214, BOTTOM_TRAY_Y_START + 28, &fonts::Font0);
 
     } else {
+        last_tray_tool = td_game.selected_tool;
+        last_tray_wave_in_progress = td_game.wave_in_progress;
+        last_tray_lightning_ready = td_game.is_lightning_ready();
+        last_tray_lightning_cd = td_game.get_lightning_cd_remaining_sec();
+
         bool sel_arrow = (td_game.selected_tool == TOOL_BUILD_ARROW);
         tft.fillRoundRect(4, BOTTOM_TRAY_Y_START + 4, 74, 30, 4, sel_arrow ? 0x2EA5 : 0x2126);
         if (sel_arrow) tft.drawRoundRect(4, BOTTOM_TRAY_Y_START + 4, 74, 30, 4, COLOR_GOLD_TXT);
@@ -388,7 +508,6 @@ static void render_victory_overlay() {
 
 void td_renderer_draw() {
     if (td_game.state == TD_STATE_TITLE) {
-        static bool title_rendered = false;
         if (!title_rendered) {
             render_title_screen();
             title_rendered = true;
@@ -403,10 +522,16 @@ void td_renderer_draw() {
     } else if (td_game.state == TD_STATE_GAME_OVER) {
         render_hud();
         render_battlefield();
-        render_game_over_overlay();
+        if (!game_over_rendered) {
+            render_game_over_overlay();
+            game_over_rendered = true;
+        }
     } else if (td_game.state == TD_STATE_VICTORY) {
         render_hud();
         render_battlefield();
-        render_victory_overlay();
+        if (!victory_rendered) {
+            render_victory_overlay();
+            victory_rendered = true;
+        }
     }
 }

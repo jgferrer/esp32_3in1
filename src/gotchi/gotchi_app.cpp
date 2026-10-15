@@ -9,7 +9,7 @@
 
 #define LV_BUF_LINES 40
 static lv_disp_draw_buf_t draw_buf;
-static lv_color_t buf[SCREEN_WIDTH * LV_BUF_LINES];
+static lv_color_t* buf = nullptr;
 
 static void gotchi_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p) {
     uint32_t w = (area->x2 - area->x1 + 1);
@@ -47,6 +47,10 @@ void gotchi_init() {
     buzzer_play_happy();
 
     lv_init();
+
+    if (!buf) {
+        buf = (lv_color_t*)malloc(SCREEN_WIDTH * LV_BUF_LINES * sizeof(lv_color_t));
+    }
 
     // Inicializar buffer de render
     lv_disp_draw_buf_init(&draw_buf, buf, NULL, SCREEN_WIDTH * LV_BUF_LINES);

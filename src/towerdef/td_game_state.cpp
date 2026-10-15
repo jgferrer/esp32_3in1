@@ -1,4 +1,5 @@
 #include "towerdef/td_game_state.h"
+#include "towerdef/td_renderer.h"
 #include "hal/buzzer.h"
 #include "hal/led.h"
 #include "towerdef/td_storage.h"
@@ -9,6 +10,7 @@ TowerDefGame td_game;
 
 void TowerDefGame::init() {
     state = TD_STATE_TITLE;
+    td_renderer_reset();
     selected_tool = TOOL_NONE;
     selected_plot_idx = -1;
     wave = 1;
@@ -48,6 +50,8 @@ void TowerDefGame::start_new_game() {
     selected_tool = TOOL_NONE;
     selected_plot_idx = -1;
     wave_in_progress = false;
+
+    td_renderer_reset();
 
     led_safe();
     buzzer_build();

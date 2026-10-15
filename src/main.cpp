@@ -101,9 +101,7 @@ void loop() {
 
         case APP_TOWERDEF: {
             uint32_t now = millis();
-            float dt = (now - last_td_frame_ms) / 1000.0f;
-            if (dt > 0.1f) dt = 0.1f;
-            last_td_frame_ms = now;
+            static uint32_t last_td_render_ms = 0;
 
             uint16_t touchX, touchY;
             bool touched = tft.getTouch(&touchX, &touchY);
@@ -118,9 +116,18 @@ void loop() {
                 was_touched_td = false;
             }
 
-            td_game.update(dt);
-            td_renderer_draw();
-            delay(8);
+            // Limitación de refresco a ~30 FPS (33ms) para sincronizar con el bus SPI
+            if (now - last_td_render_ms >= 33) {
+                float dt = (now - last_td_frame_ms) / 1000.0f;
+                if (dt > 0.1f) dt = 0.1f;
+                last_td_frame_ms = now;
+                last_td_render_ms = now;
+
+                td_game.update(dt);
+                td_renderer_draw();
+            }
+
+            delay(4);
             break;
         }
 
