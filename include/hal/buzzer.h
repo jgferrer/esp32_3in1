@@ -36,4 +36,11 @@ void buzzer_coin();
 void buzzer_enemy_breach();
 void buzzer_game_over();
 
+// Sonidos Pocket Dungeon
+void buzzer_dice_roll();
+void buzzer_dice_place();
+void buzzer_damage();
+void buzzer_skill();
+void buzzer_potion();
+
 #endif // HAL_BUZZER_H

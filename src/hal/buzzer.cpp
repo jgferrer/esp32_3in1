@@ -207,3 +207,54 @@ void buzzer_game_over() {
         delay(20);
     }
 }
+
+void buzzer_dice_roll() {
+    if (!sound_enabled) return;
+    for (int i = 0; i < 4; i++) {
+        ledcWriteTone(BUZZER_CHANNEL, 1200 + (rand() % 800));
+        delay(18);
+        ledcWrite(BUZZER_CHANNEL, 0);
+        delay(12);
+    }
+}
+
+void buzzer_dice_place() {
+    if (!sound_enabled) return;
+    ledcWriteTone(BUZZER_CHANNEL, 1400);
+    delay(15);
+    ledcWriteTone(BUZZER_CHANNEL, 1900);
+    delay(20);
+    ledcWrite(BUZZER_CHANNEL, 0);
+}
+
+void buzzer_damage() {
+    if (!sound_enabled) return;
+    ledcWriteTone(BUZZER_CHANNEL, 220);
+    delay(60);
+    ledcWriteTone(BUZZER_CHANNEL, 140);
+    delay(90);
+    ledcWrite(BUZZER_CHANNEL, 0);
+}
+
+void buzzer_skill() {
+    if (!sound_enabled) return;
+    ledcWriteTone(BUZZER_CHANNEL, 1000);
+    delay(20);
+    ledcWriteTone(BUZZER_CHANNEL, 1500);
+    delay(25);
+    ledcWriteTone(BUZZER_CHANNEL, 2100);
+    delay(35);
+    ledcWrite(BUZZER_CHANNEL, 0);
+}
+
+void buzzer_potion() {
+    if (!sound_enabled) return;
+    ledcWriteTone(BUZZER_CHANNEL, 1200);
+    delay(25);
+    ledcWriteTone(BUZZER_CHANNEL, 1600);
+    delay(30);
+    ledcWriteTone(BUZZER_CHANNEL, 2000);
+    delay(40);
+    ledcWrite(BUZZER_CHANNEL, 0);
+}
+

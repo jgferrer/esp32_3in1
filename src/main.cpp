@@ -11,6 +11,9 @@
 #include "towerdef/td_storage.h"
 #include "towerdef/td_game_state.h"
 #include "towerdef/td_renderer.h"
+#include "dungeon/pd_storage.h"
+#include "dungeon/pd_game_state.h"
+#include "dungeon/pd_renderer.h"
 
 static AppID current_app = APP_LAUNCHER;
 static uint32_t last_td_frame_ms = 0;
@@ -19,7 +22,7 @@ void setup() {
     Serial.begin(115200);
     delay(200);
     Serial.println("\n=========================================");
-    Serial.println("  ESP32-2432S028 RETRO STATION 3-IN-1    ");
+    Serial.println("  ESP32-2432S028 RETRO STATION 4-IN-1    ");
     Serial.println("=========================================");
 
     // Periféricos base
@@ -53,6 +56,14 @@ void setup() {
             td_game.init();
             td_renderer_draw();
             last_td_frame_ms = millis();
+            break;
+
+        case APP_DUNGEON:
+            Serial.println("[MAIN] Iniciando Pocket Dungeon Rogue...");
+            pd_storage_init();
+            pd_renderer_init();
+            pd_game.init();
+            pd_renderer_draw();
             break;
 
         case APP_LAUNCHER:
@@ -116,7 +127,6 @@ void loop() {
                 was_touched_td = false;
             }
 
-            // Limitación de refresco a ~30 FPS (33ms) para sincronizar con el bus SPI
             if (now - last_td_render_ms >= 33) {
                 float dt = (now - last_td_frame_ms) / 1000.0f;
                 if (dt > 0.1f) dt = 0.1f;
@@ -128,6 +138,26 @@ void loop() {
             }
 
             delay(4);
+            break;
+        }
+
+        case APP_DUNGEON: {
+            uint16_t touchX, touchY;
+            bool touched = tft.getTouch(&touchX, &touchY);
+            static bool was_touched_pd = false;
+            static uint32_t last_pd_touch_ms = 0;
+            uint32_t now = millis();
+
+            if (touched && !was_touched_pd && (now - last_pd_touch_ms >= 180)) {
+                was_touched_pd = true;
+                last_pd_touch_ms = now;
+                pd_game.handle_touch((int16_t)touchX, (int16_t)touchY);
+            } else if (!touched && was_touched_pd) {
+                was_touched_pd = false;
+            }
+
+            pd_renderer_draw();
+            delay(16);
             break;
         }
 

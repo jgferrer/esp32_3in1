@@ -1,15 +1,15 @@
-# 🎮 RetroStation 3-in-1 (ESP32-CYD)
+# 🎮 RetroStation 4-in-1 (ESP32-CYD)
 
-Consola portátil retro multitarea 3-en-1 para la placa **ESP32-2432S028 ("Cheap Yellow Display" / CYD)** con pantalla táctil TFT resistiva de 2.8" (240x320) y zumbador piezoeléctrico.
+Consola portátil retro multitarea 4-en-1 para la placa **ESP32-2432S028 ("Cheap Yellow Display" / CYD)** con pantalla táctil TFT resistiva de 2.8" (240x320) y zumbador piezoeléctrico.
 
-Incluye un menú lanzador interactivo al encender la placa que permite elegir a cuál de los 3 juegos jugar con el lápiz táctil (*stylus*), y volver en cualquier momento al menú principal sin apagar el dispositivo.
+Incluye un menú lanzador interactivo al encender la placa que permite elegir a cuál de los 4 juegos jugar con el lápiz táctil (*stylus*), y volver en cualquier momento al menú principal sin apagar el dispositivo.
 
 ---
 
 ## 📸 Capturas de Pantalla
 
 <div align="center">
-  <img src="docs/screenshots/screenshot_launcher.png" width="220" alt="Menú Lanzador 3-en-1" />
+  <img src="docs/screenshots/screenshot_launcher.png" width="220" alt="Menú Lanzador 4-en-1" />
   <img src="docs/screenshots/screenshot_gotchi.png" width="220" alt="Tamagotchi 16-Bit" />
   <br/><br/>
   <img src="docs/screenshots/screenshot_picross.png" width="220" alt="ESP-Picross DS" />
@@ -35,7 +35,7 @@ Incluye un menú lanzador interactivo al encender la placa que permite elegir a 
   * 15 rompecabezas nonogramas clásicos estilo Nintendo DS (5x5, 10x10).
   * Control por stylus con soporte para arrastre rápido (*drag*), modo marcar celdas y modo tachar con cruces [X].
   * Pistas inteligentes, cronómetro en vivo y guardado automático de mejores tiempos en memoria NVS.
-  * Botón **[ 🏠 MENU ]** para salir a la selección de puzles y botón **[ 🏠 HOME ]** para regresar al lanzador 3-en-1.
+  * Botón **[ 🏠 MENU ]** para salir a la selección de puzles y botón **[ 🏠 HOME ]** para regresar al lanzador.
 
 ### 3. 🏰 Micro-Kingdom: Tower Defense Táctil
 * **Motor:** Doble búfer con `LGFX_Sprite` para 30+ FPS suaves y renderizado sin parpadeos (*Zero-Flicker*).
@@ -49,19 +49,29 @@ Incluye un menú lanzador interactivo al encender la placa que permite elegir a 
   * Pantalla final de Victoria y Derrota protegida contra toques accidentales (filtro *debounce* de 800 ms) con opciones para **JUGAR DE NUEVO** o **SALIR AL LANZADOR**.
   * Gestión de oro inicial (140g), vidas del castillo, velocidad de juego (1x / 2x), y botón **[ 🏠 ]** en el HUD superior para volver al lanzador.
 
+### 4. 🗡️ Pocket Dungeon: Rogue Dice Crawler
+* **Motor:** LovyanGFX con interfaz táctil de cartas y dados inspirada en *One Deck Dungeon*.
+* **Características:**
+  * 3 clases de héroe con atributos y habilidades únicas: **Guerrero** (Fuerza 🟡), **Pícara** (Agilidad 🟢) y **Maga** (Magia 🔵).
+  * 3 pisos de mazmorra con encuentros generados al azar y Jefe Final: el temible **Dragón Rojo**.
+  * Combate por asignación de dados: tira tu reserva y coloca los dados en casillas que cumplan color y valor mínimo.
+  * Asignación táctica manual mediante stylus o instantánea con el botón **[ AUTO ]**.
+  * Sistema de botín multifunción: cada carta vencida se reclama como **Objeto (+1 Dado permanente)**, **Poción (+3 HP)** o **Experiencia (XP)** para subir de nivel y desbloquear dados comodín.
+  * Botón **[ SALIR ]** en el HUD superior para volver al lanzador en cualquier instante.
+
 ---
 
-## 🚀 Menú Lanzador 3-en-1 & Arquitectura de Memoria
+## 🚀 Menú Lanzador 4-en-1 & Arquitectura de Memoria
 
 El firmware utiliza una arquitectura con el esquema de particiones **`huge_app.csv`** (3.14 MB de Flash para código):
 
 ```
 Flash ESP32 (4 MB):
-┌──────────────────────────────────────┬─────────────┐
-│       App Partition (3.14 MB)        │   NVS / OT  │
-│  [Launcher + Gotchi + Picross + TD]  │ (Partidas)  │
-└──────────────────────────────────────┴─────────────┘
-  Ocupación actual: ~1.18 MB (37.5%) | RAM: ~36.7%
+┌──────────────────────────────────────────────┬─────────────┐
+│           App Partition (3.14 MB)            │   NVS / OT  │
+│  [Launcher + Gotchi + Picross + TD + Dungeon]│ (Partidas)  │
+└──────────────────────────────────────────────┴─────────────┘
+  Ocupación actual: ~1.19 MB (38.0%) | RAM: ~30.9%
 ```
 
 ### Cambio Limpio entre Juegos

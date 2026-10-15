@@ -48,7 +48,8 @@ enum AppID : uint8_t {
     APP_LAUNCHER = 0,
     APP_GOTCHI   = 1,
     APP_PICROSS  = 2,
-    APP_TOWERDEF = 3
+    APP_TOWERDEF = 3,
+    APP_DUNGEON  = 4
 };
 
 // ==========================================
@@ -102,5 +103,17 @@ enum AppID : uint8_t {
 #define COLOR_ACCENT      0x2D7F
 #define COLOR_ACCENT_ACT  0xFDE0
 #define COLOR_SUCCESS     0x2EA5
+
+// Colores Pocket Dungeon
+#define COLOR_DUNGEON_BG     0x10A2
+#define COLOR_CARD_BG        0x2145
+#define COLOR_CARD_BORDER    0xC586
+#define COLOR_DICE_YELLOW    0xFDE0
+#define COLOR_DICE_GREEN     0x36E6
+#define COLOR_DICE_BLUE      0x34BF
+#define COLOR_DICE_HEROIC    0x2965
+#define COLOR_HP_RED         0xF904
+#define COLOR_POTION_CYAN    0x1E5F
+#define COLOR_XP_PURPLE      0xB9DF
 
 #endif // CONFIG_H

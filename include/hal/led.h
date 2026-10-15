@@ -25,6 +25,9 @@ void led_breach();
 void led_thunder();
 void led_victory();
 void led_hint();
+void led_dungeon();
+void led_combat();
+void led_damage();
 void led_off();
 
 #endif // HAL_LED_H

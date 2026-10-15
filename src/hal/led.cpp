@@ -56,6 +56,19 @@ void led_hint() {
     led_set(true, true, false);
 }
 
+void led_dungeon() {
+    led_set(false, false, true); // Azul tenue
+}
+
+void led_combat() {
+    led_set(true, true, false); // Amarillo alerta
+}
+
+void led_damage() {
+    led_set(true, false, false); // Rojo peligro
+}
+
 void led_off() {
     led_set(false, false, false);
 }
+
