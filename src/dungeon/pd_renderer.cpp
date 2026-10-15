@@ -8,6 +8,7 @@ static bool state_rendered = false;
 
 static uint8_t last_dice_count = 255;
 static int8_t last_selected_die = -2;
+static int8_t last_selected_die2 = -2;
 static bool last_skill_used = false;
 static int8_t last_hero_hp = -1;
 
@@ -16,6 +17,7 @@ void pd_renderer_reset() {
     last_rendered_state = (PD_GameState)-1;
     last_dice_count = 255;
     last_selected_die = -2;
+    last_selected_die2 = -2;
     last_skill_used = false;
     last_hero_hp = -1;
 }
@@ -275,6 +277,20 @@ static void render_combat_screen() {
     tft.drawString("BANDEJA DE DADOS:", 14, 184, &fonts::Font0);
 
     if (pd_game.dice_rolled) {
+        if (pd_game.selected_die_idx >= 0 && pd_game.selected_die2_idx >= 0) {
+            uint8_t min_v = (pd_game.dice[pd_game.selected_die_idx].value < pd_game.dice[pd_game.selected_die2_idx].value) ? 
+                             pd_game.dice[pd_game.selected_die_idx].value : pd_game.dice[pd_game.selected_die2_idx].value;
+            tft.fillRoundRect(122, 182, 106, 14, 3, COLOR_GOLD_TXT);
+            tft.drawRoundRect(122, 182, 106, 14, 3, COLOR_WHITE);
+            tft.setTextColor(COLOR_BLACK, COLOR_GOLD_TXT);
+            char btn_str[24];
+            snprintf(btn_str, sizeof(btn_str), "FUSIONAR > [%u]", min_v);
+            tft.drawCenterString(btn_str, 175, 185, &fonts::Font0);
+        } else if (pd_game.selected_die_idx >= 0 && pd_game.dice[pd_game.selected_die_idx].type != PD_DICE_HEROIC) {
+            tft.setTextColor(COLOR_GOLD_TXT, COLOR_DUNGEON_BG);
+            tft.drawString("(Toca otro igual)", 124, 185, &fonts::Font0);
+        }
+
         int16_t die_w = 32;
         int16_t start_dx = 12;
 
@@ -289,10 +305,12 @@ static void render_combat_screen() {
                 tft.setTextColor(0x4208, COLOR_DUNGEON_BG);
                 tft.drawCenterString("-", dx + die_w / 2, dy + 8, &fonts::Font2);
             } else {
-                bool is_sel = (pd_game.selected_die_idx == d);
+                bool is_sel = (pd_game.selected_die_idx == d || pd_game.selected_die2_idx == d);
                 tft.fillRoundRect(dx, dy, die_w, die_w, 4, d_col);
                 tft.drawRoundRect(dx, dy, die_w, die_w, 4, is_sel ? COLOR_WHITE : 0x0000);
-                if (is_sel) tft.drawRoundRect(dx - 1, dy - 1, die_w + 2, die_w + 2, 5, COLOR_GOLD_TXT);
+                if (is_sel) {
+                    tft.drawRoundRect(dx - 1, dy - 1, die_w + 2, die_w + 2, 5, COLOR_GOLD_TXT);
+                }
 
                 char d_val[8];
                 snprintf(d_val, sizeof(d_val), "%u", die.value);
@@ -447,11 +465,13 @@ void pd_renderer_draw() {
 
         case PD_STATE_COMBAT:
             if (!state_rendered || last_selected_die != pd_game.selected_die_idx ||
+                last_selected_die2 != pd_game.selected_die2_idx ||
                 last_dice_count != pd_game.dice_count || last_skill_used != pd_game.hero.skill_used ||
                 last_hero_hp != pd_game.hero.hp) {
                 render_combat_screen();
                 state_rendered = true;
                 last_selected_die = pd_game.selected_die_idx;
+                last_selected_die2 = pd_game.selected_die2_idx;
                 last_dice_count = pd_game.dice_count;
                 last_skill_used = pd_game.hero.skill_used;
                 last_hero_hp = pd_game.hero.hp;
