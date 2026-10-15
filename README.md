@@ -10,8 +10,9 @@ Incluye un menú lanzador interactivo al encender la placa que permite elegir a 
 
 <div align="center">
   <img src="docs/screenshots/screenshot_launcher.png" width="220" alt="Menú Lanzador 4-en-1" />
-  <img src="docs/screenshots/screenshot_gotchi.png" width="220" alt="Tamagotchi 16-Bit" />
+  <img src="docs/screenshots/screenshot_dungeon.png" width="220" alt="Pocket Dungeon: Rogue Dice Crawler" />
   <br/><br/>
+  <img src="docs/screenshots/screenshot_gotchi.png" width="220" alt="Tamagotchi 16-Bit" />
   <img src="docs/screenshots/screenshot_picross.png" width="220" alt="ESP-Picross DS" />
   <img src="docs/screenshots/screenshot_towerdef.png" width="220" alt="Micro-Kingdom Tower Defense" />
 </div>
@@ -55,6 +56,7 @@ Incluye un menú lanzador interactivo al encender la placa que permite elegir a 
   * 3 clases de héroe con atributos y habilidades únicas: **Guerrero** (Fuerza 🟡), **Pícara** (Agilidad 🟢) y **Maga** (Magia 🔵).
   * 3 pisos de mazmorra con encuentros generados al azar y Jefe Final: el temible **Dragón Rojo**.
   * Combate por asignación de dados: tira tu reserva y coloca los dados en casillas que cumplan color y valor mínimo.
+  * **Fusión de dados táctica (One Deck Dungeon):** Combina dos dados del mismo color tocándolos en la bandeja para crear un dado negro heroico/comodín con el valor del más bajo (`min(d1, d2)`), utilizable en cualquier casilla de desafío.
   * Asignación táctica manual mediante stylus o instantánea con el botón **[ AUTO ]**.
   * Sistema de botín multifunción: cada carta vencida se reclama como **Objeto (+1 Dado permanente)**, **Poción (+3 HP)** o **Experiencia (XP)** para subir de nivel y desbloquear dados comodín.
   * Botón **[ SALIR ]** en el HUD superior para volver al lanzador en cualquier instante.
@@ -75,10 +77,10 @@ Flash ESP32 (4 MB):
 ```
 
 ### Cambio Limpio entre Juegos
-1. Al encender la placa o conectarla por USB (`ESP_RST_POWERON`), arranca siempre en el **Menú Lanzador 3-en-1**.
+1. Al encender la placa o conectarla por USB (`ESP_RST_POWERON`), arranca siempre en el **Menú Lanzador 4-en-1**.
 2. Al tocar una tarjeta de juego, se almacena el ID del juego en NVS y se reinicia en caliente (`ESP.restart()`, ~180ms).
 3. Esto garantiza que la memoria RAM y el *heap* queden 100% limpios al cambiar entre juegos basados en LVGL y juegos basados en Sprites con doble búfer.
-4. Al pulsar el botón **[ SALIR ]** o **[ HOME ]** en cualquiera de los tres juegos, el sistema vuelve limpiamente al menú de inicio.
+4. Al pulsar el botón **[ SALIR ]** o **[ HOME ]** en cualquiera de los cuatro juegos, el sistema vuelve limpiamente al menú de inicio.
 
 ---
 
