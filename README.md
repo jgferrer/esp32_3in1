@@ -38,12 +38,16 @@ Incluye un menú lanzador interactivo al encender la placa que permite elegir a 
   * Botón **[ 🏠 MENU ]** para salir a la selección de puzles y botón **[ 🏠 HOME ]** para regresar al lanzador 3-en-1.
 
 ### 3. 🏰 Micro-Kingdom: Tower Defense Táctil
-* **Motor:** Doble búfer con `LGFX_Sprite` para 30+ FPS suaves.
+* **Motor:** Doble búfer con `LGFX_Sprite` para 30+ FPS suaves y renderizado sin parpadeos (*Zero-Flicker*).
 * **Características:**
-  * Estrategia en tiempo real con 10 oleadas de invasores (Goblins, Orcos, Gólems y Jefe Dragón).
-  * 3 tipos de torres medievales con 3 niveles de mejora: Flechas, Cañón explosivo y Torre de Escarcha/Ralentización.
-  * Hechizo táctil interactivo de **Rayo Celestial** tocando a los enemigos directamente en el campo de batalla.
-  * Gestión de oro, vidas del castillo, velocidad de juego (1x / 2x), y botón **[ 🏠 ]** en el HUD superior para volver al lanzador.
+  * Estrategia en tiempo real con 10 oleadas de invasores progresivas (Goblins veloces, Orcos, Gólems blindados y Jefe Dragón Supremo de 2.200 HP).
+  * 3 tipos de torres con sinergias tácticas y 3 niveles de mejora:
+    * **Arqueros (85g):** Cadencia rápida (2.5 disparos/s) eficaz contra enjambres veloces.
+    * **Cañón (160g):** Artillería pesada con gran daño en área y dispersión contra frentes blindados.
+    * **Mago de Hielo (115g):** Nueva escarcha en área (radio 26 px) ralentizando al 50% durante 3.2s.
+  * Hechizo táctil interactivo de **Rayo Celestial** tocando a los enemigos directamente en la pantalla con el lápiz táctil (10s de recarga).
+  * Pantalla final de Victoria y Derrota protegida contra toques accidentales (filtro *debounce* de 800 ms) con opciones para **JUGAR DE NUEVO** o **SALIR AL LANZADOR**.
+  * Gestión de oro inicial (140g), vidas del castillo, velocidad de juego (1x / 2x), y botón **[ 🏠 ]** en el HUD superior para volver al lanzador.
 
 ---
 
