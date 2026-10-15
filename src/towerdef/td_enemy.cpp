@@ -10,28 +10,28 @@ void enemy_spawn(Enemy& e, EnemyType type, uint8_t wave) {
     e.current_wp = 1;
     e.slow_until_ms = 0;
 
-    float wave_mult = 1.0f + (wave - 1) * 0.18f;
+    float wave_mult = 1.0f + (wave - 1) * 0.22f;
 
     switch (type) {
         case ENEMY_GOBLIN:
-            e.max_hp = 45.0f * wave_mult;
-            e.speed = 28.0f; // píxeles por segundo
-            e.reward_gold = 10;
+            e.max_hp = 38.0f * wave_mult;
+            e.speed = 36.0f; // Velocistas ágiles (esquivan cañones lentos)
+            e.reward_gold = 7;
             break;
         case ENEMY_ORC:
-            e.max_hp = 110.0f * wave_mult;
-            e.speed = 18.0f;
-            e.reward_gold = 18;
+            e.max_hp = 125.0f * wave_mult;
+            e.speed = 21.0f;
+            e.reward_gold = 14;
             break;
         case ENEMY_GOLEM:
-            e.max_hp = 250.0f * wave_mult;
-            e.speed = 12.0f;
-            e.reward_gold = 30;
+            e.max_hp = 320.0f * wave_mult;
+            e.speed = 13.0f; // Tanques pesados blindados
+            e.reward_gold = 24;
             break;
         case ENEMY_BOSS:
-            e.max_hp = (wave >= 10 ? 1200.0f : 550.0f);
-            e.speed = 9.0f;
-            e.reward_gold = 90;
+            e.max_hp = (wave >= 10 ? 2200.0f : 850.0f);
+            e.speed = 10.5f;
+            e.reward_gold = 75;
             break;
     }
     e.hp = e.max_hp;

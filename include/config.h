@@ -70,7 +70,7 @@ enum AppID : uint8_t {
 #define BOTTOM_TRAY_HEIGHT  74
 
 #define INITIAL_LIVES   10
-#define INITIAL_GOLD    160
+#define INITIAL_GOLD    140
 #define TOTAL_WAVES     10
 
 #define MAX_ENEMIES     16

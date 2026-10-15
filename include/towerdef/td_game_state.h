@@ -40,6 +40,7 @@ public:
     bool lightning_anim_active;
     Point lightning_target;
     uint32_t lightning_anim_end_ms;
+    uint32_t end_state_time_ms;
 
     TowerPlot plots[NUM_PLOTS];
     Enemy enemies[MAX_ENEMIES];

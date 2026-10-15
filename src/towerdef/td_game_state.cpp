@@ -20,9 +20,10 @@ void TowerDefGame::init() {
     game_speed = 1;
     wave_in_progress = false;
     enemies_to_spawn = 0;
-    lightning_cooldown_ms = 8000;
+    lightning_cooldown_ms = 10000;
     lightning_last_used_ms = 0;
     lightning_anim_active = false;
+    end_state_time_ms = 0;
 
     for (uint8_t i = 0; i < NUM_PLOTS; i++) {
         plots[i].x = (int16_t)INITIAL_PLOTS[i].x;
@@ -61,9 +62,10 @@ void TowerDefGame::start_next_wave() {
     if (wave_in_progress || state != TD_STATE_PLAYING) return;
 
     wave_in_progress = true;
-    enemies_to_spawn = 6 + (wave * 3);
+    enemies_to_spawn = 7 + (wave * 2);
     enemy_spawn_type_count = 0;
-    spawn_interval_ms = (wave >= 8) ? 850 : (1400 - (wave * 55));
+    spawn_interval_ms = 1300 - (wave * 35);
+    if (spawn_interval_ms < 650) spawn_interval_ms = 650;
     last_spawn_ms = millis() - spawn_interval_ms;
 
     buzzer_click();
@@ -187,10 +189,27 @@ void TowerDefGame::update_wave_spawning(uint32_t now_ms) {
 
             if ((wave == 5 || wave == 10) && enemies_to_spawn == 1) {
                 t = ENEMY_BOSS;
-            } else if (wave >= 3 && (enemy_spawn_type_count % 4 == 0)) {
-                t = ENEMY_GOLEM;
-            } else if (wave >= 2 && (enemy_spawn_type_count % 2 == 0)) {
-                t = ENEMY_ORC;
+            } else if (wave == 1) {
+                // Oleada 1: Solo Goblins ágiles
+                t = ENEMY_GOBLIN;
+            } else if (wave == 2) {
+                // Oleada 2: Goblins rápidos con algunos Orcos
+                t = (enemy_spawn_type_count % 3 == 0) ? ENEMY_ORC : ENEMY_GOBLIN;
+            } else if (wave == 3 || wave == 4) {
+                // Asaltos combinados con primeros Gólems
+                if (enemy_spawn_type_count % 5 == 0) t = ENEMY_GOLEM;
+                else if (enemy_spawn_type_count % 2 == 0) t = ENEMY_ORC;
+                else t = ENEMY_GOBLIN;
+            } else if (wave >= 5 && wave <= 7) {
+                // Frentes blindados
+                if (enemy_spawn_type_count % 4 == 0) t = ENEMY_GOLEM;
+                else if (enemy_spawn_type_count % 3 == 0) t = ENEMY_ORC;
+                else t = ENEMY_GOBLIN;
+            } else {
+                // Oleadas 8 a 10: Invasión masiva pesada
+                if (enemy_spawn_type_count % 3 == 0) t = ENEMY_GOLEM;
+                else if (enemy_spawn_type_count % 2 == 0) t = ENEMY_ORC;
+                else t = ENEMY_GOBLIN;
             }
 
             enemy_spawn(enemies[free_slot], t, wave);
@@ -277,6 +296,7 @@ void TowerDefGame::update_enemies(float dt_sec, uint32_t now_ms) {
             if (lives <= 0) {
                 lives = 0;
                 state = TD_STATE_GAME_OVER;
+                end_state_time_ms = millis();
                 buzzer_game_over();
                 td_storage_save_high_score(score);
                 td_storage_save_max_wave(wave);
@@ -332,13 +352,14 @@ void TowerDefGame::check_wave_completion() {
 
     if (!any_active) {
         wave_in_progress = false;
-        uint16_t bonus = 35 + (wave * 12);
+        uint16_t bonus = 25 + (wave * 8);
         gold += bonus;
         score += wave * 100;
         buzzer_build();
 
         if (wave >= TOTAL_WAVES) {
             state = TD_STATE_VICTORY;
+            end_state_time_ms = millis();
             buzzer_victory();
             led_victory();
             td_storage_save_high_score(score);
@@ -380,10 +401,22 @@ void TowerDefGame::handle_touch(int16_t tx, int16_t ty) {
     }
 
     if (state == TD_STATE_GAME_OVER || state == TD_STATE_VICTORY) {
-        if (ty >= 155 && ty <= 190) {
-            start_new_game();
-        } else {
-            launcher_return_home();
+        // Debounce para evitar que toques residuales de combate activen botones
+        if (millis() - end_state_time_ms < 800) {
+            return;
+        }
+
+        // Botones centrados X: 40..200 (con margen 25..215)
+        // Botón 1 (Reintentar / Jugar de nuevo): Y: 145..177 (margen 140..178)
+        // Botón 2 (Salir al lanzador): Y: 182..212 (margen 180..218)
+        if (tx >= 25 && tx <= 215) {
+            if (ty >= 140 && ty <= 178) {
+                start_new_game();
+                return;
+            } else if (ty >= 180 && ty <= 218) {
+                launcher_return_home();
+                return;
+            }
         }
         return;
     }

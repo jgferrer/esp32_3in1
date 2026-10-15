@@ -418,21 +418,21 @@ static void render_bottom_tray() {
         if (sel_arrow) tft.drawRoundRect(4, BOTTOM_TRAY_Y_START + 4, 74, 30, 4, COLOR_GOLD_TXT);
         tft.setTextColor(sel_arrow ? COLOR_GOLD_TXT : COLOR_WHITE, sel_arrow ? 0x2EA5 : 0x2126);
         tft.drawCenterString("ARQUERO", 41, BOTTOM_TRAY_Y_START + 8, &fonts::Font0);
-        tft.drawCenterString("100g", 41, BOTTOM_TRAY_Y_START + 20, &fonts::Font0);
+        tft.drawCenterString("85g", 41, BOTTOM_TRAY_Y_START + 20, &fonts::Font0);
 
         bool sel_cannon = (td_game.selected_tool == TOOL_BUILD_CANNON);
         tft.fillRoundRect(82, BOTTOM_TRAY_Y_START + 4, 74, 30, 4, sel_cannon ? 0x2EA5 : 0x2126);
         if (sel_cannon) tft.drawRoundRect(82, BOTTOM_TRAY_Y_START + 4, 74, 30, 4, COLOR_GOLD_TXT);
         tft.setTextColor(sel_cannon ? COLOR_GOLD_TXT : COLOR_WHITE, sel_cannon ? 0x2EA5 : 0x2126);
         tft.drawCenterString("CANON", 119, BOTTOM_TRAY_Y_START + 8, &fonts::Font0);
-        tft.drawCenterString("150g", 119, BOTTOM_TRAY_Y_START + 20, &fonts::Font0);
+        tft.drawCenterString("160g", 119, BOTTOM_TRAY_Y_START + 20, &fonts::Font0);
 
         bool sel_ice = (td_game.selected_tool == TOOL_BUILD_ICE);
         tft.fillRoundRect(160, BOTTOM_TRAY_Y_START + 4, 76, 30, 4, sel_ice ? 0x2EA5 : 0x2126);
         if (sel_ice) tft.drawRoundRect(160, BOTTOM_TRAY_Y_START + 4, 76, 30, 4, COLOR_GOLD_TXT);
         tft.setTextColor(sel_ice ? COLOR_GOLD_TXT : COLOR_WHITE, sel_ice ? 0x2EA5 : 0x2126);
         tft.drawCenterString("M. HIELO", 198, BOTTOM_TRAY_Y_START + 8, &fonts::Font0);
-        tft.drawCenterString("125g", 198, BOTTOM_TRAY_Y_START + 20, &fonts::Font0);
+        tft.drawCenterString("115g", 198, BOTTOM_TRAY_Y_START + 20, &fonts::Font0);
 
         bool l_ready = td_game.is_lightning_ready();
         bool sel_light = (td_game.selected_tool == TOOL_SPELL_LIGHTNING);
@@ -520,16 +520,16 @@ void td_renderer_draw() {
         render_battlefield();
         render_bottom_tray();
     } else if (td_game.state == TD_STATE_GAME_OVER) {
-        render_hud();
-        render_battlefield();
         if (!game_over_rendered) {
+            render_hud();
+            render_battlefield();
             render_game_over_overlay();
             game_over_rendered = true;
         }
     } else if (td_game.state == TD_STATE_VICTORY) {
-        render_hud();
-        render_battlefield();
         if (!victory_rendered) {
+            render_hud();
+            render_battlefield();
             render_victory_overlay();
             victory_rendered = true;
         }

@@ -13,9 +13,9 @@ void projectile_spawn(Projectile& p, ProjectileType type, float start_x, float s
     p.splash_radius = splash_rad;
 
     switch (type) {
-        case PROJ_ARROW:      p.speed = 120.0f; break;
-        case PROJ_CANNONBALL: p.speed = 85.0f;  break;
-        case PROJ_ICE_BOLT:   p.speed = 100.0f; break;
+        case PROJ_ARROW:      p.speed = 140.0f; break; // Rápido y certero
+        case PROJ_CANNONBALL: p.speed = 72.0f;  break; // Pesado, lento en el aire
+        case PROJ_ICE_BOLT:   p.speed = 110.0f; break; // Ráfaga mágica
     }
 }
 
@@ -41,25 +41,50 @@ bool projectile_update(Projectile& p, Enemy enemies[], uint8_t max_enemies, floa
         p.active = false;
 
         if (p.type == PROJ_CANNONBALL) {
-            // Daño en área (Splash)
+            // Explosión de área con caída de daño
             for (uint8_t i = 0; i < max_enemies; i++) {
                 if (enemies[i].active) {
                     float edx = enemies[i].x - p.target_x;
                     float edy = enemies[i].y - p.target_y;
                     float edist = sqrtf(edx * edx + edy * edy);
                     if (edist <= p.splash_radius) {
-                        enemies[i].hp -= p.damage;
+                        float falloff = 1.0f - (edist / (p.splash_radius * 1.5f));
+                        if (falloff < 0.5f) falloff = 0.5f;
+
+                        float dmg = p.damage * falloff;
+                        // Goblins ágiles esquivan el 35% del daño por onda expansiva
+                        if (enemies[i].type == ENEMY_GOBLIN) {
+                            dmg *= 0.65f;
+                        }
+                        enemies[i].hp -= dmg;
+                    }
+                }
+            }
+        } else if (p.type == PROJ_ICE_BOLT) {
+            // Escarcha en área: ralentiza a grupos en radio de 26 px
+            float frost_radius = 26.0f;
+            for (uint8_t i = 0; i < max_enemies; i++) {
+                if (enemies[i].active) {
+                    float edx = enemies[i].x - p.target_x;
+                    float edy = enemies[i].y - p.target_y;
+                    float edist = sqrtf(edx * edx + edy * edy);
+                    if (edist <= frost_radius) {
+                        enemies[i].hp -= (i == p.target_enemy_idx) ? p.damage : (p.damage * 0.5f);
+                        enemies[i].slow_until_ms = now_ms + 3200; // 3.2s ralentizado
                     }
                 }
             }
         } else {
-            // Daño directo a objetivo
+            // Flecha directa: perfecta contra Goblins, pero Orcos y Gólems tienen armadura
             if (p.target_enemy_idx >= 0 && p.target_enemy_idx < max_enemies) {
                 if (enemies[p.target_enemy_idx].active) {
-                    enemies[p.target_enemy_idx].hp -= p.damage;
-                    if (p.type == PROJ_ICE_BOLT) {
-                        enemies[p.target_enemy_idx].slow_until_ms = now_ms + 3000;
+                    float dmg = p.damage;
+                    if (enemies[p.target_enemy_idx].type == ENEMY_ORC) {
+                        dmg *= 0.75f; // -25% por cota de malla
+                    } else if (enemies[p.target_enemy_idx].type == ENEMY_GOLEM) {
+                        dmg *= 0.60f; // -40% por piel de roca
                     }
+                    enemies[p.target_enemy_idx].hp -= dmg;
                 }
             }
         }
