@@ -6,6 +6,18 @@ Incluye un menú lanzador interactivo al encender la placa que permite elegir a 
 
 ---
 
+## 📸 Capturas de Pantalla
+
+<div align="center">
+  <img src="docs/screenshots/screenshot_launcher.png" width="220" alt="Menú Lanzador 3-en-1" />
+  <img src="docs/screenshots/screenshot_gotchi.png" width="220" alt="Tamagotchi 16-Bit" />
+  <br/><br/>
+  <img src="docs/screenshots/screenshot_picross.png" width="220" alt="ESP-Picross DS" />
+  <img src="docs/screenshots/screenshot_towerdef.png" width="220" alt="Micro-Kingdom Tower Defense" />
+</div>
+
+---
+
 ## 🕹️ Juegos Incluidos
 
 ### 1. 🐣 Tamagotchi 16-Bit Retro Edition
